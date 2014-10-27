@@ -29,7 +29,7 @@ private:
 
 signals:
     void channelListProvided(ChannelList);
-    void channelIconProvided(QString, QPixmap);
+    void channelIconProvided(QString, QImage);
     void channelImageProvided(QString, QImage);
 
 public slots:

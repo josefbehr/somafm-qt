@@ -32,25 +32,25 @@ private:
     QStringList m_columns;
     int m_rowHeight;
     ChannelList m_channelList;
-    QHash<QString, QPixmap> m_iconList;
+    QHash<QString, QImage> m_iconCache;
     QStringList m_favorites;
     QStringList m_idList;
     QString m_selectedId;
     QColor m_favoritesColor;
 
 protected:
-    QPixmap channelIcon(QString id);
+    QImage channelIcon(QString id);
 
 signals:
     void requestChannelIcon(QString);
     void channelActivated(QString);
 
 public slots:
-    void updateChannelList(ChannelList newList);
-    void updateChannelIcon(QString, QPixmap);
+    void updateChannelList(ChannelList);
+    void updateChannelIcon(QString, QImage);
     void selectionChanged(const QItemSelection&, const QItemSelection&);
     void channelActivated(QModelIndex);
-    void contextMenuEvent(QContextMenuEvent * event);
+    void contextMenuEvent(QContextMenuEvent*);
     void toggleFavorite();
 
 };

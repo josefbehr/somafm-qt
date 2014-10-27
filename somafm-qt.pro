@@ -22,3 +22,5 @@ HEADERS  += mainwindow.h \
     dataprovider.h \
     channelsview.h \
     playerview.h
+
+CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT

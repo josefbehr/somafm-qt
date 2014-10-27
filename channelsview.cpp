@@ -10,18 +10,17 @@ void ChannelsViewItemDelegate::paint(QPainter *painter,
 {
     // do the default drawing
     this->QItemDelegate::paint(painter, option, index);
+
+    // set style of separator line (solid, lightgray, 1px)
     qreal width = 1.0;
     QColor color = QColor(Qt::lightGray);
     Qt::PenStyle penstyle = Qt::SolidLine;
 
-    // if not last item, draw line at bottom
-    int rows = index.model()->rowCount()-1;
-    if(index.row() <= rows) {
-        painter->save();
-        painter->setPen(QPen(QBrush(color), width, penstyle));
-        painter->drawLine(option.rect.bottomLeft(), option.rect.bottomRight());
-        painter->restore();
-    }
+    // draw line at bottom of items (and therefore, whole row)
+    painter->save();
+    painter->setPen(QPen(QBrush(color), width, penstyle));
+    painter->drawLine(option.rect.bottomLeft(), option.rect.bottomRight());
+    painter->restore();
 }
 
 
@@ -30,31 +29,39 @@ ChannelsView::ChannelsView(QWidget *parent) :
 {
     qDebug() << "ChannelsView::ChannelsView";
 
+    QSettings settings;
+    m_favorites = settings.value("favorites", QStringList()).toStringList();
+
     setItemDelegate(new ChannelsViewItemDelegate());
 
-    m_columns = QStringList() << "title" << "description";
+    // change palette for selected items' background from blue to gray
+    QPalette p = palette();
+    p.setColor(QPalette::Highlight, QColor(221, 221, 221)); // #ddd
+    p.setColor(QPalette::HighlightedText, QColor(Qt::black));
+    setPalette(p);
+
+    m_columns = QStringList() << "title"
+                              << "description";
     m_favoritesColor = QColor(154, 205, 50, 100); // yellowgreen, alpha = 100
-    m_rowHeight = fontMetrics().height()*4;
+    m_rowHeight = fontMetrics().height()*5; // reasonable row height
+    qDebug() << fontInfo().pointSize();
+    qDebug() << font().pointSize();
+    m_rowHeight = fontInfo().pixelSize()*5;
 
     QHeaderView *verticalHeader = this->verticalHeader();
-    verticalHeader->setDefaultSectionSize(m_rowHeight+1);
+    verticalHeader->setDefaultSectionSize(m_rowHeight+1); // default row height
     verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
     verticalHeader->hide();
-    horizontalHeader()->hide();
     horizontalHeader()->setStretchLastSection(true);
-    setSelectionMode(QAbstractItemView::SingleSelection);
+    horizontalHeader()->hide();
     setSelectionBehavior(QAbstractItemView::SelectRows);
-    setFocusPolicy(Qt::StrongFocus);
+    setSelectionMode(QAbstractItemView::SingleSelection);
+    setFocusPolicy(Qt::StrongFocus); // can get keyboard or mouse focus
     setShowGrid(false);
-    setTabKeyNavigation(false);
+    setTabKeyNavigation(false); // disable tab (jumps cells), up/down keys work
 
     connect(this, SIGNAL(activated(QModelIndex)),
             this, SLOT(channelActivated(QModelIndex)));
-
-    setStyleSheet("*{selection-background-color:#ddd;selection-color:#222;}");
-
-    QSettings settings;
-    m_favorites = settings.value("favorites", QStringList()).toStringList();
 }
 
 ChannelsView::~ChannelsView() {
@@ -84,6 +91,7 @@ void ChannelsView::contextMenuEvent(QContextMenuEvent * event) {
 
 void ChannelsView::channelActivated(QModelIndex index) {
     qDebug() << "ChannelsView::channelActivated";
+
     QString id = m_idList.at(index.row());
     emit channelActivated(id);
 }
@@ -106,6 +114,7 @@ void ChannelsView::selectionChanged(const QItemSelection &selected,
 
 void ChannelsView::toggleFavorite() {
     qDebug() << "ChannelsView::toggleFavorite";
+
     if(m_favorites.contains(m_selectedId)) {
         m_favorites.removeOne(m_selectedId);
     } else {
@@ -136,11 +145,10 @@ void ChannelsView::updateChannelList(ChannelList newList) {
     // Create model for the table from re-sorted list
     QStandardItemModel *model = new QStandardItemModel;
     model->setColumnCount(m_columns.size());
-    //int r = model->rowCount();
 
     int r;
     QStringList idList;
-    for(it = channelList.constBegin(), r = 0;
+    for(it = channelList.constBegin(), r = 0; // 'it' is declared earlier
         it != channelList.constEnd();
         ++it , ++r) {
 
@@ -152,7 +160,11 @@ void ChannelsView::updateChannelList(ChannelList newList) {
             QString col = m_columns.at(i);
             QStandardItem *item = new QStandardItem((*it).value(col));
             if(col == "title") {
-                item->setData(channelIcon(id), Qt::DecorationRole);
+                QImage icon = channelIcon(id);
+                QPixmap pixmap = QPixmap::fromImage(icon).scaled(m_rowHeight,
+                                                                 m_rowHeight,
+                                                        Qt::KeepAspectRatio);
+                item->setData(pixmap, Qt::DecorationRole);
                 item->setFont(QFont("", -1, QFont::Bold));
                 item->setTextAlignment(Qt::AlignCenter);
             }
@@ -182,20 +194,20 @@ void ChannelsView::updateChannelList(ChannelList newList) {
 
 // delivers memory-cached (QHash) pixmaps for channel icons
 // and requests them, if not available
-QPixmap ChannelsView::channelIcon(QString id) {
+QImage ChannelsView::channelIcon(QString id) {
     qDebug() << "ChannelsView::channelIcon";
 
-    if(!m_iconList.contains(id)) { // icon not cached
+    if(!m_iconCache.contains(id)) { // icon not cached
         emit requestChannelIcon(id); // request it
         QPixmap emptyPixmap = QPixmap(m_rowHeight, m_rowHeight);
         emptyPixmap.fill(Qt::transparent);
-        return emptyPixmap; // and return transparent icon for now
+        return emptyPixmap.toImage(); // and return transparent icon for now
     }
 
-    return m_iconList.value(id); // otherwise, deliver stored icon
+    return m_iconCache.value(id); // otherwise, deliver stored icon
 }
 
-void ChannelsView::updateChannelIcon(QString id, QPixmap pixmap) {
+void ChannelsView::updateChannelIcon(QString id, QImage icon) {
     qDebug() << "ChannelsView::updateChannelIcon";
 
     if(!m_idList.contains(id)) {
@@ -207,11 +219,9 @@ void ChannelsView::updateChannelIcon(QString id, QPixmap pixmap) {
     if(!m->hasIndex(row, 0)) {
         return; // this should never happen due to above check, nonetheless...
     }
-    QPixmap newIcon = pixmap.scaled(m_rowHeight,
-                                    m_rowHeight,
-                                    Qt::KeepAspectRatioByExpanding);
-    m->setData(m->index(row, 0),
-               newIcon,
-               Qt::DecorationRole);
-    m_iconList.insert(id, newIcon);
+    QPixmap pixmap = QPixmap::fromImage(icon).scaled(m_rowHeight,
+                                                      m_rowHeight,
+                                            Qt::KeepAspectRatioByExpanding);
+    m->setData(m->index(row, 0), pixmap, Qt::DecorationRole);
+    m_iconCache.insert(id, icon);
 }

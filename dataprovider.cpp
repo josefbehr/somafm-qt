@@ -14,8 +14,8 @@ DataProvider::DataProvider(QObject *parent) :
     m_diskCache = new QNetworkDiskCache(this);
 
     m_channelsUrl = QUrl("http://somafm.com/channels.xml");
-    //m_cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-    m_cacheDir = "/tmp/somafm-qt-cache-test/"; // TODO CHANGEME
+    m_cacheDir =
+            QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
     m_diskCache->setCacheDirectory(m_cacheDir);
     m_networkManager->setCache(m_diskCache);
 
@@ -110,7 +110,7 @@ void DataProvider::handleNetworkReply(QNetworkReply *reply) {
         parseChannelsXml(data);
     } else if(m_iconRequests.contains(url)) {
         QString id = m_iconRequests.value(url);
-        QPixmap icon = QPixmap::fromImage(QImage::fromData(data));
+        QImage icon = QImage::fromData(data);
         emit channelIconProvided(id, icon);
         m_iconRequests.remove(url);
     } else if(m_imageRequests.contains(url)) {

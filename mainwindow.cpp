@@ -7,17 +7,22 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     qDebug() << "MainWindow::MainWindow";
+
     QCoreApplication::setOrganizationName("somafm-qt");
     //QCoreApplication::setOrganizationDomain("somafm.com");
     QCoreApplication::setApplicationName("somafm-qt");
+    setWindowTitle(tr("SomaFM Radio Player"));
     readSettings();
 
-    m_tabWidget = new QTabWidget;
-    m_channelsView = new ChannelsView;
+    setFont(QFont(fontInfo().family(), -1));
+
+    m_tabWidget = new QTabWidget(this);
+    m_channelsView = new ChannelsView(this);
+    m_channelsView->setFocus();
 
     m_tabWidget->addTab(m_channelsView, tr("Channels"));
 
-    m_playerView = new PlayerView;
+    m_playerView = new PlayerView(this);
 
     m_mainLayout = new QVBoxLayout;
     m_mainLayout->addWidget(m_tabWidget);
@@ -27,7 +32,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_mainWidget->setLayout(m_mainLayout);
 
     setCentralWidget(m_mainWidget);
-    setWindowTitle(tr("SomaFM Radio Player"));
 
     m_dataProvider = new DataProvider;
     connect(m_dataProvider, SIGNAL(channelListProvided(ChannelList)),
@@ -36,8 +40,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_channelsView, SIGNAL(requestChannelIcon(QString)),
             m_dataProvider, SLOT(provideChannelIcon(QString)));
 
-    connect(m_dataProvider, SIGNAL(channelIconProvided(QString,QPixmap)),
-            m_channelsView, SLOT(updateChannelIcon(QString,QPixmap)));
+    connect(m_dataProvider, SIGNAL(channelIconProvided(QString,QImage)),
+            m_channelsView, SLOT(updateChannelIcon(QString,QImage)));
 
     connect(m_dataProvider, SIGNAL(channelImageProvided(QString,QImage)),
             m_playerView, SLOT(updateChannelImage(QString,QImage)));
@@ -81,7 +85,7 @@ void MainWindow::readSettings()
 {
     QSettings settings;
     settings.beginGroup("MainWindow");
-    resize(settings.value("size", QSize(400, 600)).toSize());
-    move(settings.value("pos", QPoint(200, 200)).toPoint());
+    resize(settings.value("size", QSize(520, 800)).toSize());
+    move(settings.value("pos", QPoint(0, 0)).toPoint());
     settings.endGroup();
 }

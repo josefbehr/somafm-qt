@@ -4,7 +4,9 @@
 #include <QGraphicsView>
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
-#include <QGraphicsSimpleTextItem>
+#include <QGraphicsTextItem>
+#include <QGraphicsRectItem>
+#include <QGraphicsPolygonItem>
 
 class PlayerView : public QGraphicsView
 {
@@ -16,7 +18,12 @@ private:
     QImage m_channelImage;
     QMediaPlayer *m_player;
     QMediaPlaylist *m_playlist;
-    QGraphicsSimpleTextItem *m_mainText;
+    QGraphicsTextItem *m_mainText;
+    QGraphicsRectItem *m_stopButton;
+    QGraphicsPolygonItem *m_playButton;
+
+protected:
+    void setText(QString);
 
 signals:
     void requestChannelImage(QString);
@@ -27,6 +34,9 @@ public slots:
     void play(QString, QUrl);
     void showBufferStatus(int);
     void showMetaData();
+    void handleStateChange(QMediaPlayer::State);
+    void mousePressEvent(QMouseEvent*);
+    void mediaStatusChanged(QMediaPlayer::MediaStatus);
 
 };
 
