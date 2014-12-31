@@ -44,8 +44,6 @@ ChannelsView::ChannelsView(QWidget *parent) :
                               << "description";
     m_favoritesColor = QColor(154, 205, 50, 100); // yellowgreen, alpha = 100
     m_rowHeight = fontMetrics().height()*5; // reasonable row height
-    qDebug() << fontInfo().pointSize();
-    qDebug() << font().pointSize();
     m_rowHeight = fontInfo().pixelSize()*5;
 
     QHeaderView *verticalHeader = this->verticalHeader();
@@ -72,20 +70,29 @@ ChannelsView::~ChannelsView() {
 void ChannelsView::contextMenuEvent(QContextMenuEvent * event) {
     qDebug() << "ChannelsView::contextMenuEvent";
 
-    QIcon favIcon = QIcon::fromTheme("emblem-favorite");
-    QString favText;
-    if(m_favorites.contains(m_selectedId)) {
-        favIcon = QIcon(favIcon.pixmap(m_rowHeight, QIcon::Normal));
-        favText = tr("Remove from favorites");
-    } else {
-        favIcon = QIcon(favIcon.pixmap(m_rowHeight, QIcon::Disabled));
-        favText = tr("Add to favorites");
-    }
     QMenu *menu = new QMenu(this);
-    QAction *favAction = new QAction(favIcon, favText, this);
-    menu->addAction(favAction);
-    connect(favAction, SIGNAL(triggered()),
-            this, SLOT(toggleFavorite()));
+
+    if(!m_selectedId.isEmpty()) {
+        QIcon favIcon = QIcon::fromTheme("emblem-favorite");
+        QString favText;
+        if(m_favorites.contains(m_selectedId)) {
+            favIcon = QIcon(favIcon.pixmap(m_rowHeight, QIcon::Normal));
+            favText = tr("Remove from favorites");
+        } else {
+            favIcon = QIcon(favIcon.pixmap(m_rowHeight, QIcon::Disabled));
+            favText = tr("Add to favorites");
+        }
+        QAction *favAction = new QAction(favIcon, favText, this);
+        menu->addAction(favAction);
+        connect(favAction, SIGNAL(triggered()),
+                this, SLOT(toggleFavorite()));
+    }
+
+    QAction *updateAction = new QAction(QIcon::fromTheme("view-refresh"),
+                                        tr("Refresh channel list"), this);
+    menu->addAction(updateAction);
+    connect(updateAction, SIGNAL(triggered()),
+            this, SIGNAL(requestChannelList()));
     menu->popup(event->globalPos());
 }
 
@@ -155,6 +162,7 @@ void ChannelsView::updateChannelList(ChannelList newList) {
         QString id = (*it).value("id");
         QString genre = (*it).value("genre");
         QString dj = (*it).value("dj");
+        QString listeners = (*it).value("listeners");
 
         for(int i = 0; i < m_columns.size(); ++i) {
             QString col = m_columns.at(i);
@@ -173,7 +181,8 @@ void ChannelsView::updateChannelList(ChannelList newList) {
             }
             item->setEditable(false);
             item->setToolTip("genre: " + genre +
-                             "\ndj: " + (dj.isEmpty() ? "-" : dj));
+                             "\ndj: " + (dj.isEmpty() ? "-" : dj) +
+                             "\nlisteners: " + listeners);
             model->setItem(r, i, item);
         }
         idList.append(id);

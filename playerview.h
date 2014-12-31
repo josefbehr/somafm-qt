@@ -37,6 +37,7 @@ public slots:
     void handleStateChange(QMediaPlayer::State);
     void mousePressEvent(QMouseEvent*);
     void mediaStatusChanged(QMediaPlayer::MediaStatus);
+    void handleError(QMediaPlayer::Error);
 
 };
 

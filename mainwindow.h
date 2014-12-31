@@ -7,6 +7,7 @@
 #include <QVBoxLayout>
 #include <QGraphicsView>
 #include <QFrame>
+#include <QLabel>
 
 #include "channelsview.h"
 #include "dataprovider.h"
@@ -26,6 +27,7 @@ public:
     void writeSettings();
 
 private:
+    QLabel *m_topView;
     QTabWidget *m_tabWidget;
     ChannelsView *m_channelsView;
     QVBoxLayout *m_mainLayout;

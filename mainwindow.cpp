@@ -16,6 +16,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     setFont(QFont(fontInfo().family(), -1));
 
+    m_topView = new QLabel(this);
+    //m_topView->setFixedSize(QSize(468, 60));
+    //m_topView->setWidth(m_topView->maximumWidth());
+    m_topView->setScaledContents(true);
+    QPixmap banner = QPixmap::fromImage(QImage(":/banner.gif"));
+    m_topView->setPixmap(banner);
+
     m_tabWidget = new QTabWidget(this);
     m_channelsView = new ChannelsView(this);
     m_channelsView->setFocus();
@@ -25,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_playerView = new PlayerView(this);
 
     m_mainLayout = new QVBoxLayout;
+    m_mainLayout->addWidget(m_topView);
     m_mainLayout->addWidget(m_tabWidget);
     m_mainLayout->addWidget(m_playerView);
 
@@ -34,6 +42,9 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(m_mainWidget);
 
     m_dataProvider = new DataProvider;
+    connect(m_channelsView, SIGNAL(requestChannelList()),
+            m_dataProvider, SLOT(provideChannelList()));
+
     connect(m_dataProvider, SIGNAL(channelListProvided(ChannelList)),
             m_channelsView, SLOT(updateChannelList(ChannelList)));
 

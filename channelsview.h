@@ -44,6 +44,7 @@ protected:
 signals:
     void requestChannelIcon(QString);
     void channelActivated(QString);
+    void requestChannelList();
 
 public slots:
     void updateChannelList(ChannelList);

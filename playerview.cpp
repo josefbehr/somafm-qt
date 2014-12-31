@@ -37,15 +37,13 @@ PlayerView::PlayerView(QWidget *parent) :
     m_playButton->setOpacity(0.5);
     m_playButton->hide();
 
-    m_mainText = scene->addText(tr("Double-click a channel to start playing"));
-    m_mainText->setFont(QFont("", -1, QFont::Bold));
-    //m_mainText->setBrush(QBrush(Qt::black));
-    //m_mainText->setPen(QPen(QBrush(Qt::white), 0.5, Qt::SolidLine, Qt::RoundCap));
-    m_mainText->setTextWidth(300);
-    //m_mainText->setPos(-260, 0);
-    //centerOn(m_mainText);
+    m_mainText = scene->addText("");
+    m_mainText->setFont(QFont(QFont(fontInfo().family(),
+                                    fontInfo().pointSize(),
+                                    QFont::Bold)));
 
     setSceneRect(-100, -35, 520, 100);
+    setText(tr("Double-click a channel to start playing"));
 
     m_playlist = new QMediaPlaylist;
     m_player = new QMediaPlayer;
@@ -56,8 +54,12 @@ PlayerView::PlayerView(QWidget *parent) :
 
     connect(m_player, SIGNAL(stateChanged(QMediaPlayer::State)),
             this, SLOT(handleStateChange(QMediaPlayer::State)));
+
     connect(m_player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)),
             this, SLOT(mediaStatusChanged(QMediaPlayer::MediaStatus)));
+
+    connect(m_player, SIGNAL(error(QMediaPlayer::Error)),
+            this, SLOT(handleError(QMediaPlayer::Error)));
 }
 
 void PlayerView::setText(QString text) {
@@ -67,7 +69,6 @@ void PlayerView::setText(QString text) {
     m_mainText->setHtml("<center>"+text+"</center>");
     m_mainText->setTextWidth(300);
     centerOn(0, 0);
-    qDebug() << sceneRect();
 }
 
 void PlayerView::mousePressEvent(QMouseEvent *event) {
@@ -93,7 +94,7 @@ void PlayerView::mediaStatusChanged(QMediaPlayer::MediaStatus status) {
     qDebug() << "PlayerView::mediaStatusChanged" << status;
 
     switch(status) {
-    case QMediaPlayer::StalledMedia: // buffering, not playing
+    case QMediaPlayer::LoadingMedia: // buffering, not playing
         connect(m_player, SIGNAL(bufferStatusChanged(int)),
                 this, SLOT(showBufferStatus(int)));
         break;
@@ -104,8 +105,33 @@ void PlayerView::mediaStatusChanged(QMediaPlayer::MediaStatus status) {
         connect(m_player, SIGNAL(metaDataChanged()),
                 this, SLOT(showMetaData()));
         break;
+    case QMediaPlayer::UnknownMediaStatus:
+    case QMediaPlayer::NoMedia:
+    case QMediaPlayer::EndOfMedia:
+    case QMediaPlayer::InvalidMedia:
+        m_player->stop();
+        break;
+    case QMediaPlayer::StalledMedia:
+    case QMediaPlayer::BufferingMedia:
+    case QMediaPlayer::LoadedMedia:
+        break;
     }
 
+}
+
+void PlayerView::handleError(QMediaPlayer::Error error) {
+    qDebug() << "PlayerView::handleError" << error;
+
+    switch(error) {
+    case QMediaPlayer::NoError:
+    case QMediaPlayer::ResourceError:
+    case QMediaPlayer::FormatError:
+    case QMediaPlayer::NetworkError:
+    case QMediaPlayer::AccessDeniedError:
+    case QMediaPlayer::ServiceMissingError:
+        setText(tr("An error occured"));
+        break;
+    }
 }
 
 void PlayerView::handleStateChange(QMediaPlayer::State state) {
@@ -133,6 +159,9 @@ void PlayerView::showMetaData() {
     qDebug() << "PlayerView::showMetaData";
 
     QStringList avail = m_player->availableMetaData();
+    //for(int i=0; i<avail.size(); ++i) {
+    //    qDebug() << avail.at(i) << " : " << m_player->metaData(avail.at(i));
+    //}
     if(avail.contains("Title")) {
         setText(m_player->metaData("Title").toString());
     }

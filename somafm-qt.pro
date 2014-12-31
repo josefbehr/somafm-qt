@@ -24,3 +24,9 @@ HEADERS  += mainwindow.h \
     playerview.h
 
 CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
+
+RESOURCES += \
+    application.qrc
+
+DISTFILES += \
+    README.md
