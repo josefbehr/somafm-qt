@@ -23,15 +23,18 @@ Build and Install
 -----------------
 ### Linux
 Clone the git repository:
+
     git clone https://github.com/josefbehr/somafm-qt.git
 
 Make sure to have installed the qt5 development headers as well as the
 network and multimedia components. Then build using qmake:
+
     cd somafm-qt
     qmake
     make
 
 If everything works, you'll get a binary called somafm-qt, which you can run:
+
     ./somafm-qt
 
 ### Windows and MacOS
