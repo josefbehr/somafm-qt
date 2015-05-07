@@ -18,9 +18,10 @@ It does the basics:
 * Some error handling
 * (Use official API)
 * Tray icon
+* 'News' Tab(?)
 
-Build and Install
------------------
+Build
+------
 ### Linux
 Clone the git repository:
 
@@ -44,5 +45,5 @@ specifics to include here, please share and I'll add the information.
 Bugs and Problems
 -----------------
 This program is an early work in progress, and if you encounter any
-problems or bugs, please feel free to report them on the github issure
+problems or bugs, please feel free to report them on the github issue
 tracker.

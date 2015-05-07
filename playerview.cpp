@@ -45,8 +45,8 @@ PlayerView::PlayerView(QWidget *parent) :
     setSceneRect(-100, -35, 520, 100);
     setText(tr("Double-click a channel to start playing"));
 
-    m_playlist = new QMediaPlaylist;
-    m_player = new QMediaPlayer;
+    m_playlist = new QMediaPlaylist(this);
+    m_player = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
     m_player->setPlaylist(m_playlist);
 
     connect(m_playlist, SIGNAL(loaded()),
@@ -104,6 +104,7 @@ void PlayerView::mediaStatusChanged(QMediaPlayer::MediaStatus status) {
         showMetaData();
         connect(m_player, SIGNAL(metaDataChanged()),
                 this, SLOT(showMetaData()));
+        m_player->play();
         break;
     case QMediaPlayer::UnknownMediaStatus:
     case QMediaPlayer::NoMedia:
@@ -112,6 +113,8 @@ void PlayerView::mediaStatusChanged(QMediaPlayer::MediaStatus status) {
         m_player->stop();
         break;
     case QMediaPlayer::StalledMedia:
+        m_player->pause();
+        break;
     case QMediaPlayer::BufferingMedia:
     case QMediaPlayer::LoadedMedia:
         break;
