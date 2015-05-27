@@ -36,9 +36,11 @@ private:
     QStringList m_favorites;
     QStringList m_idList;
     QString m_selectedId;
+    QString m_playingId;
     QColor m_favoritesColor;
 
 protected:
+    void keyReleaseEvent(QKeyEvent *event);
     QImage channelIcon(QString id);
 
 signals:
@@ -53,6 +55,8 @@ public slots:
     void channelActivated(QModelIndex);
     void contextMenuEvent(QContextMenuEvent*);
     void toggleFavorite();
+    void playingState(QString);
+    void stoppedState();
 
 };
 

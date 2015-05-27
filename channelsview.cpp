@@ -57,14 +57,27 @@ ChannelsView::ChannelsView(QWidget *parent) :
     setFocusPolicy(Qt::StrongFocus); // can get keyboard or mouse focus
     setShowGrid(false);
     setTabKeyNavigation(false); // disable tab (jumps cells), up/down keys work
+    setFocus();
 
-    connect(this, SIGNAL(activated(QModelIndex)),
+    //connect(this, SIGNAL(activated(QModelIndex)),
+    //        this, SLOT(channelActivated(QModelIndex)));
+
+    connect(this, SIGNAL(doubleClicked(QModelIndex)),
             this, SLOT(channelActivated(QModelIndex)));
+
 }
 
 ChannelsView::~ChannelsView() {
     QSettings settings;
     settings.setValue("favorites", m_favorites);
+}
+
+void ChannelsView::keyReleaseEvent(QKeyEvent *event) {
+    if(event->key() == Qt::Key_Return) {
+        emit channelActivated(m_selectedId);
+    } else {
+        QTableView::keyReleaseEvent(event);
+    }
 }
 
 void ChannelsView::contextMenuEvent(QContextMenuEvent * event) {
@@ -124,10 +137,11 @@ void ChannelsView::toggleFavorite() {
 
     if(m_favorites.contains(m_selectedId)) {
         m_favorites.removeOne(m_selectedId);
+        emit requestChannelList();
     } else {
         m_favorites.append(m_selectedId);
+        updateChannelList(m_channelList); // re-order list and model
     }
-    updateChannelList(m_channelList); // re-order list and model
 }
 
 void ChannelsView::updateChannelList(ChannelList newList) {
@@ -233,4 +247,75 @@ void ChannelsView::updateChannelIcon(QString id, QImage icon) {
                                             Qt::KeepAspectRatioByExpanding);
     m->setData(m->index(row, 0), pixmap, Qt::DecorationRole);
     m_iconCache.insert(id, icon);
+}
+
+void ChannelsView::playingState(QString id) {
+    qDebug() << "ChannelsView::playingState(" << id << ")";
+
+    m_playingId = id;
+
+    QStandardItemModel *m = qobject_cast<QStandardItemModel*>(model());
+    int index = m_idList.indexOf(id);
+    QStandardItem *item = m->item(index);
+    if(item == 0) {
+        return;
+    }
+
+    QPixmap base;
+    QVariant baseV = item->data(Qt::DecorationRole);
+    if(!baseV.canConvert<QPixmap>()) {
+        return;
+    }
+
+    base = baseV.value<QPixmap>();
+    QPixmap result(base.width(), base.height());
+
+    result.fill(Qt::transparent); // force alpha channel
+    {
+        QPainter painter(&result);
+        painter.drawPixmap(0, 0, base);
+
+        QRectF rect = QRectF(20, 20, 25, 25); // paint green triangle on chan img
+        QPainterPath path;
+        path.moveTo(rect.topLeft());
+        path.lineTo(rect.bottomLeft());
+        path.lineTo(rect.right(), rect.top() + (rect.height() / 2));
+        path.lineTo(rect.topLeft());
+
+        QColor penColor = QColor(Qt::gray);
+        penColor.setAlphaF(0.4);
+        QColor brushColor = QColor(Qt::darkGreen);
+        brushColor.setAlphaF(0.4);
+        painter.setBrush(QBrush(brushColor));
+        painter.setPen(penColor);
+        //painter.fillPath(path, color);
+        painter.drawPath(path);
+    }
+
+    item->setData(result, Qt::DecorationRole);
+}
+
+void ChannelsView::stoppedState() {
+    qDebug() << "ChannelsView::stoppedState()";
+
+    QString id = m_playingId;
+
+    QStandardItemModel *m = qobject_cast<QStandardItemModel*>(model());
+    int index = m_idList.indexOf(id);
+    QStandardItem *item = m->item(index);
+    if(item == 0) {
+        return;
+    }
+
+    if(!m_iconCache.contains(id)) { // icon not cached
+        emit requestChannelIcon(id); // let it update automatically
+        return;
+        qDebug() << "not cached";
+    }
+    QPixmap pixmap = QPixmap::fromImage(m_iconCache.value(id)).
+                                scaled(m_rowHeight,
+                                m_rowHeight,
+                                Qt::KeepAspectRatio);
+    item->setData(pixmap, Qt::DecorationRole);
+    m_playingId = "";
 }

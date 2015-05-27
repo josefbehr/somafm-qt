@@ -63,6 +63,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_playerView, SIGNAL(requestChannelImage(QString)),
             m_dataProvider, SLOT(provideChannelImage(QString)));
 
+    connect(m_playerView, SIGNAL(playerStarted(QString)),
+            m_channelsView, SLOT(playingState(QString)));
+    connect(m_playerView, SIGNAL(playerStopped()),
+            m_channelsView, SLOT(stoppedState()));
+
     m_dataProvider->provideChannelList();
 }
 

@@ -9,6 +9,7 @@ PlayerView::PlayerView(QWidget *parent) :
     setCacheMode(QGraphicsView::CacheBackground);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setFocusPolicy(Qt::NoFocus);
 
     QGraphicsScene *scene = new QGraphicsScene;
     setScene(scene);
@@ -132,6 +133,7 @@ void PlayerView::handleError(QMediaPlayer::Error error) {
     case QMediaPlayer::NetworkError:
     case QMediaPlayer::AccessDeniedError:
     case QMediaPlayer::ServiceMissingError:
+    case QMediaPlayer::MediaIsPlaylist:
         setText(tr("An error occured"));
         break;
     }
@@ -144,6 +146,7 @@ void PlayerView::handleStateChange(QMediaPlayer::State state) {
     case QMediaPlayer::PlayingState:
         m_playButton->hide();
         m_stopButton->show();
+        emit playerStarted(m_id);
         break;
     case QMediaPlayer::StoppedState:
         disconnect(m_player, SIGNAL(metaDataChanged()),
@@ -151,6 +154,7 @@ void PlayerView::handleStateChange(QMediaPlayer::State state) {
         disconnect(m_player, SIGNAL(bufferStatusChanged(int)),
                    this, SLOT(showBufferStatus(int)));
         setText(tr("Stopped"));
+        emit playerStopped();
         break;
     case QMediaPlayer::PausedState: // we don't pause a radio stream
     default:
@@ -184,8 +188,11 @@ void PlayerView::play(QString id, QUrl url) {
         return;
     }
 
+    m_id = id;
+
     if(m_player->state() == QMediaPlayer::PlayingState) {
         m_player->stop();
+        qDebug() << "never reached?";
     }
     m_playlist->clear();
     m_playlist->load(url);

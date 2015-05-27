@@ -21,12 +21,15 @@ private:
     QGraphicsTextItem *m_mainText;
     QGraphicsRectItem *m_stopButton;
     QGraphicsPolygonItem *m_playButton;
+    QString m_id;
 
 protected:
     void setText(QString);
 
 signals:
     void requestChannelImage(QString);
+    void playerStarted(QString);
+    void playerStopped();
 
 public slots:
     void drawBackground(QPainter*, const QRectF&);
