@@ -192,7 +192,6 @@ void PlayerView::play(QString id, QUrl url) {
 
     if(m_player->state() == QMediaPlayer::PlayingState) {
         m_player->stop();
-        qDebug() << "never reached?";
     }
     m_playlist->clear();
     m_playlist->load(url);

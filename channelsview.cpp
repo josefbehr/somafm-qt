@@ -213,6 +213,8 @@ void ChannelsView::updateChannelList(ChannelList newList) {
     if(!m_selectedId.isEmpty()) {
         selectRow(m_idList.indexOf(m_selectedId));
     }
+
+    playingState(m_playingId); // re-show play indicator
 }
 
 // delivers memory-cached (QHash) pixmaps for channel icons
@@ -299,6 +301,7 @@ void ChannelsView::stoppedState() {
     qDebug() << "ChannelsView::stoppedState()";
 
     QString id = m_playingId;
+    m_playingId = "";
 
     QStandardItemModel *m = qobject_cast<QStandardItemModel*>(model());
     int index = m_idList.indexOf(id);
@@ -310,12 +313,10 @@ void ChannelsView::stoppedState() {
     if(!m_iconCache.contains(id)) { // icon not cached
         emit requestChannelIcon(id); // let it update automatically
         return;
-        qDebug() << "not cached";
     }
     QPixmap pixmap = QPixmap::fromImage(m_iconCache.value(id)).
                                 scaled(m_rowHeight,
                                 m_rowHeight,
                                 Qt::KeepAspectRatio);
     item->setData(pixmap, Qt::DecorationRole);
-    m_playingId = "";
 }
