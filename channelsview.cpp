@@ -310,11 +310,7 @@ void ChannelsView::stoppedState() {
         return;
     }
 
-    if(!m_iconCache.contains(id)) { // icon not cached
-        emit requestChannelIcon(id); // let it update automatically
-        return;
-    }
-    QPixmap pixmap = QPixmap::fromImage(m_iconCache.value(id)).
+    QPixmap pixmap = QPixmap::fromImage(channelIcon(id)).
                                 scaled(m_rowHeight,
                                 m_rowHeight,
                                 Qt::KeepAspectRatio);
