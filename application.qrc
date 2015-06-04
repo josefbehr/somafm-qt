@@ -1,5 +1,6 @@
-<!DOCTYPE RCC><RCC version="1.0">
-<qresource>
-    <file>banner.gif</file>
-</qresource>
+<RCC>
+    <qresource prefix="/">
+        <file>banner.gif</file>
+        <file>icon.png</file>
+    </qresource>
 </RCC>

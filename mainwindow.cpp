@@ -1,4 +1,5 @@
 #include <QSettings>
+#include <QMenu>
 
 #include "dataprovider.h"
 #include "mainwindow.h"
@@ -12,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     //QCoreApplication::setOrganizationDomain("somafm.com");
     QCoreApplication::setApplicationName("somafm-qt");
     setWindowTitle(tr("SomaFM Radio Player"));
+    setWindowIcon(QIcon(":/icon.png"));
     readSettings();
 
     setFont(QFont(fontInfo().family(), -1));
@@ -26,8 +28,10 @@ MainWindow::MainWindow(QWidget *parent)
     m_tabWidget = new QTabWidget(this);
     m_channelsView = new ChannelsView(this);
     m_channelsView->setFocus();
+    m_settingsView = new SettingsView(this);
 
     m_tabWidget->addTab(m_channelsView, tr("Channels"));
+    m_tabWidget->addTab(m_settingsView, tr("Settings"));
 
     m_playerView = new PlayerView(this);
 
@@ -68,7 +72,50 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_playerView, SIGNAL(playerStopped()),
             m_channelsView, SLOT(stoppedState()));
 
+    connect(m_playerView, SIGNAL(titleUpdated(QString)),
+            this, SLOT(updateTitle(QString)));
+
+    connect(m_settingsView, SIGNAL(showTrayIcon(bool)),
+            this, SLOT(showTrayIcon(bool)));
+
     m_dataProvider->provideChannelList();
+
+    createTrayIcon();
+    m_settingsView->applySettings();
+}
+
+void MainWindow::createTrayIcon() {
+    qDebug() << "MainWindow::createTrayIcon()";
+
+    m_trayIcon = new QSystemTrayIcon(this);
+    m_trayIcon->setIcon(QIcon(":icon.png"));
+    m_trayIcon->setToolTip(tr("Not playing"));
+    connect(m_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+            this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
+}
+
+void MainWindow::showTrayIcon(bool show) {
+    qDebug() << "MainWindow::showTrayIcon(" << show << ")";
+
+    m_trayIcon->setVisible(show);
+}
+
+void MainWindow::trayIconActivated(QSystemTrayIcon::ActivationReason reason) {
+    qDebug() << "MainWindow::trayIconActivated";
+
+    switch(reason) {
+        case QSystemTrayIcon::Trigger:
+            setVisible(!isVisible());
+        break;
+        default:
+        break;
+    }
+}
+
+void MainWindow::updateTitle(QString title) {
+    qDebug() << "MainWindow::updateTitle(" << title << ")";
+
+    m_trayIcon->setToolTip(title);
 }
 
 void MainWindow::startPlayer(QString id) {
@@ -79,29 +126,30 @@ void MainWindow::startPlayer(QString id) {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-    writeSettings();
+    qDebug() << "MainWindow::closeEvent";
+
+    m_trayIcon->hide();
+    delete m_trayIcon;
     event->accept();
 }
 
 MainWindow::~MainWindow()
 {
+    qDebug() << "MainWindow::~MainWindow()";
+
+    writeSettings();
 }
 
 void MainWindow::writeSettings()
 {
     QSettings settings;
-
-    settings.beginGroup("MainWindow");
     settings.setValue("size", size());
     settings.setValue("pos", pos());
-    settings.endGroup();
 }
 
 void MainWindow::readSettings()
 {
     QSettings settings;
-    settings.beginGroup("MainWindow");
     resize(settings.value("size", QSize(520, 800)).toSize());
     move(settings.value("pos", QPoint(0, 0)).toPoint());
-    settings.endGroup();
 }

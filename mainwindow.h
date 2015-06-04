@@ -8,10 +8,12 @@
 #include <QGraphicsView>
 #include <QFrame>
 #include <QLabel>
+#include <QSystemTrayIcon>
 
 #include "channelsview.h"
 #include "dataprovider.h"
 #include "playerview.h"
+#include "settingsview.h"
 
 class MainWindow : public QMainWindow
 {
@@ -19,6 +21,7 @@ class MainWindow : public QMainWindow
 
 protected:
     void closeEvent(QCloseEvent *);
+    void createTrayIcon();
 
 public:
     MainWindow(QWidget *parent = 0);
@@ -34,9 +37,14 @@ private:
     QFrame *m_mainWidget;
     DataProvider *m_dataProvider;
     PlayerView *m_playerView;
+    QSystemTrayIcon *m_trayIcon;
+    SettingsView *m_settingsView;
 
 public slots:
     void startPlayer(QString);
+    void trayIconActivated(QSystemTrayIcon::ActivationReason);
+    void showTrayIcon(bool);
+    void updateTitle(QString);
 };
 
 #endif // MAINWINDOW_H

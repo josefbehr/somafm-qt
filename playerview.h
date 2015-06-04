@@ -30,6 +30,7 @@ signals:
     void requestChannelImage(QString);
     void playerStarted(QString);
     void playerStopped();
+    void titleUpdated(QString);
 
 public slots:
     void drawBackground(QPainter*, const QRectF&);

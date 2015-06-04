@@ -170,7 +170,9 @@ void PlayerView::showMetaData() {
     //    qDebug() << avail.at(i) << " : " << m_player->metaData(avail.at(i));
     //}
     if(avail.contains("Title")) {
-        setText(m_player->metaData("Title").toString());
+        QString title = m_player->metaData("Title").toString();
+        setText(title);
+        emit titleUpdated(title);
     }
 }
 

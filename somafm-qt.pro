@@ -16,12 +16,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     dataprovider.cpp \
     channelsview.cpp \
-    playerview.cpp
+    playerview.cpp \
+    settingsview.cpp
 
 HEADERS  += mainwindow.h \
     dataprovider.h \
     channelsview.h \
-    playerview.h
+    playerview.h \
+    settingsview.h
 
 CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 
