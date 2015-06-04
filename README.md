@@ -9,15 +9,13 @@ It does the basics:
 * Double-click a channel to play it
 * Rudimentary player control
 * Manage favorite channels
+* Tray icon
 
 ![Screenshot](https://raw.githubusercontent.com/josefbehr/somafm-qt/master/screenshot.png "Screenshot")
 
 ### ToDo
 * Song history of current channel
-* Settings tab
-* Some error handling
-* (Use official API)
-* Tray icon
+* (Use official API?)
 * 'News' Tab(?)
 
 Build
