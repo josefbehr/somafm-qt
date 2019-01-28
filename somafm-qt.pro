@@ -9,6 +9,7 @@ QT       += core gui network xml multimedia
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = somafm-qt
+TARGET.path = /usr/local
 TEMPLATE = app
 
 
