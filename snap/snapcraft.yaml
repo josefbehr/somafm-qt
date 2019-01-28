@@ -1,0 +1,36 @@
+name: somafm-qt
+base: core18
+version: 'master'
+summary: SomaFM Radio (somafm.com) player (desktop, qt5)
+description: |
+  SomaFM Radio (somafm.com) player (desktop, qt5)
+grade: stable
+confinement: strict
+
+apps:
+  somafm-qt:
+    command: usr/local/bin/somafm-qt
+    environment:
+      LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
+    plugs: 
+      - home
+      - desktop
+      - network
+      - pulseaudio
+      - x11
+
+parts:
+  somafm-qt:
+    source: https://github.com/fredix/somafm-qt.git
+    source-type: git
+    plugin: qmake
+    build-packages:
+      - g++
+      - qtbase5-dev
+      - qtmultimedia5-dev
+      - libpulse-dev
+    stage-packages: 
+      - libqt5gui5
+      - libqt5multimedia5
+      - libqt5widgets5
+      - libpulse0
