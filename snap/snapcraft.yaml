@@ -5,7 +5,7 @@ summary: SomaFM Radio (somafm.com) player (desktop, qt5)
 description: |
   SomaFM Radio (somafm.com) player (desktop, qt5)
 grade: devel
-confinement: devmode
+confinement: strict
 
 apps:
   somafm-qt:
@@ -14,8 +14,11 @@ apps:
       LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
     plugs: 
       - home
+      - unity7
       - desktop
+      - desktop-legacy
       - network
+      - opengl
       - pulseaudio
       - wayland
       - x11
@@ -29,22 +32,21 @@ parts:
       - qtbase5-dev
       - qtmultimedia5-dev
       - wayland-protocols
-      - libpulse-dev
     stage-packages: 
       - libqt5gui5
       - libqt5multimedia5
       - libqt5multimedia5-plugins
       - libqt5widgets5
-      - libqt5dbus5
-      - libqt5core5a
-      - qt5-default
-      - libpulse0
+#      - libqt5dbus5
+#      - libqt5core5a
+#      - qt5-default
       - gstreamer1.0-pulseaudio
       - gstreamer1.0-plugins-good
       - gstreamer1.0-plugins-ugly
       - gstreamer1.0-plugins-bad
-    after:
-      - desktop-qt5
+      - libslang2
+      - libgpm2
+    after: [desktop-qt5]
 
   desktop-qt5:
     source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
