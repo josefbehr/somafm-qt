@@ -4,8 +4,9 @@ version: 'master'
 summary: SomaFM Radio (somafm.com) player (desktop, qt5)
 description: |
   SomaFM Radio (somafm.com) player (desktop, qt5)
-grade: devel
+grade: stable
 confinement: strict
+license: MIT
 
 apps:
   somafm-qt:
