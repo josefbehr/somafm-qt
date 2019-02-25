@@ -33,6 +33,12 @@ MainWindow::MainWindow(QWidget *parent)
     m_tabWidget->addTab(m_channelsView, tr("Channels"));
     m_tabWidget->addTab(m_settingsView, tr("Settings"));
 
+    m_newsView = new QWebEngineView();
+    m_newsView->setUrl(QUrl(QStringLiteral("http://somafm.com/news/")));
+
+    m_tabWidget->addTab(m_newsView, tr("News"));
+
+
     m_playerView = new PlayerView(this);
 
     m_mainLayout = new QVBoxLayout;
