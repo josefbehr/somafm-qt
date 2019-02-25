@@ -40,7 +40,8 @@ private:
     PlayerView *m_playerView;
     QSystemTrayIcon *m_trayIcon;
     SettingsView *m_settingsView;
-    QWebEngineView * m_newsView;
+    QWebEngineView *m_newsView;
+    QWebEngineView *m_historyView;
 
 public slots:
     void startPlayer(QString);

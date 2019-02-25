@@ -28,15 +28,21 @@ MainWindow::MainWindow(QWidget *parent)
     m_tabWidget = new QTabWidget(this);
     m_channelsView = new ChannelsView(this);
     m_channelsView->setFocus();
-    m_settingsView = new SettingsView(this);
 
     m_tabWidget->addTab(m_channelsView, tr("Channels"));
-    m_tabWidget->addTab(m_settingsView, tr("Settings"));
+
+
+    m_historyView = new QWebEngineView();
+    m_historyView->setUrl(QUrl(QStringLiteral("http://somafm.com/groovesalad/songhistory.html")));
+    m_tabWidget->addTab(m_historyView, tr("History"));
+
 
     m_newsView = new QWebEngineView();
     m_newsView->setUrl(QUrl(QStringLiteral("http://somafm.com/news/")));
-
     m_tabWidget->addTab(m_newsView, tr("News"));
+
+    m_settingsView = new SettingsView(this);
+    m_tabWidget->addTab(m_settingsView, tr("Settings"));
 
 
     m_playerView = new PlayerView(this);
@@ -125,7 +131,9 @@ void MainWindow::updateTitle(QString title) {
 }
 
 void MainWindow::startPlayer(QString id) {
-    qDebug() << "MainWindow::startPlayer";
+    qDebug() << "MainWindow::startPlayer : " << id;
+    QUrl history_url = "http://somafm.com/" + id + "/songhistory.html";
+    m_historyView->load(history_url);
 
     QUrl url = m_dataProvider->getPlaylistUrl(id);
     m_playerView->play(id, url);
