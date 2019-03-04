@@ -7,13 +7,21 @@ description: |
 grade: stable
 confinement: strict
 license: MIT
+architectures: [amd64]
+
+plugs:
+  browser-sandbox:
+    interface: browser-support
+    allow-sandbox: false
 
 apps:
   somafm-qt:
     command: desktop-launch $SNAP/usr/bin/somafm-qt
     environment:
       LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
+      QTWEBENGINE_DISABLE_SANDBOX: 1
     plugs: 
+      - browser-sandbox
       - home
       - unity7
       - desktop
@@ -25,28 +33,49 @@ apps:
       - x11
 
 parts:
+  qtconf:
+    plugin: dump
+    source: .snap-data/
+    organize:
+      qt.conf: usr/lib/somafm-qt/qt.conf
+      qt.WebEngineProcess.conf: usr/lib/x86_64-linux-gnu/qt5/libexec/qt.conf
+    after: [somafm-qt]
+
   somafm-qt:
-    source: https://github.com/fredix/somafm-qt.git
-    source-type: git
+#    source: https://github.com/fredix/somafm-qt.git
+#    source-type: git
+    source: .
     plugin: qmake
     build-packages:
       - qtbase5-dev
       - qtmultimedia5-dev
+      - qtwebengine5-dev
+      - qtwebengine5-dev-tools
       - wayland-protocols
+      - qttools5-dev-tools
+      - qt5-default
     stage-packages: 
       - libqt5gui5
       - libqt5multimedia5
       - libqt5multimedia5-plugins
+      - libqt5multimediawidgets5
       - libqt5widgets5
-#      - libqt5dbus5
-#      - libqt5core5a
-#      - qt5-default
+      - libqt5webenginecore5
+      - libqt5webenginewidgets5
+      - libqt5webengine5
+      - qtwayland5
+      - libqt5dbus5
+      - libqt5core5a
       - gstreamer1.0-pulseaudio
+      - gstreamer1.0-plugins-base
       - gstreamer1.0-plugins-good
       - gstreamer1.0-plugins-ugly
       - gstreamer1.0-plugins-bad
       - libslang2
       - libgpm2
+      - libglu1-mesa
+      - ttf-ubuntu-font-family
+      - fonts-dejavu
     after: [desktop-qt5]
 
   desktop-qt5:
