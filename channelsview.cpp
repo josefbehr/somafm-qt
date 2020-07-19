@@ -188,7 +188,7 @@ void ChannelsView::updateChannelList(ChannelList newList) {
                                                                  m_rowHeight,
                                                         Qt::KeepAspectRatio);
                 item->setData(pixmap, Qt::DecorationRole);
-                //item->setFont(QFont("", -1, QFont::Bold));
+                item->setFont(QFont("AnyStyle", -1, QFont::Bold));
                 item->setTextAlignment(Qt::AlignCenter);
             }
             if((*it).value("favorite") == "yes") {
