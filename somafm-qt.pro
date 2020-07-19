@@ -13,6 +13,7 @@ target.path = /usr/bin
 INSTALLS += target
 TEMPLATE = app
 
+# QMAKE_CXXFLAGS += "-fno-sized-deallocation"
 
 SOURCES += main.cpp\
         mainwindow.cpp \

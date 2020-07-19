@@ -1,5 +1,6 @@
 #include <QStandardItemModel>
 #include <QPainter>
+#include <QPainterPath>
 #include <QMenu>
 
 #include "channelsview.h"
@@ -187,7 +188,7 @@ void ChannelsView::updateChannelList(ChannelList newList) {
                                                                  m_rowHeight,
                                                         Qt::KeepAspectRatio);
                 item->setData(pixmap, Qt::DecorationRole);
-                item->setFont(QFont("", -1, QFont::Bold));
+                //item->setFont(QFont("", -1, QFont::Bold));
                 item->setTextAlignment(Qt::AlignCenter);
             }
             if((*it).value("favorite") == "yes") {

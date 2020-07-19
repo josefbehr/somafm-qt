@@ -16,12 +16,19 @@ architectures: [amd64]
 
 # https://bugs.launchpad.net/snapcraft/+bug/1836206/
 layout:
-    /usr/share/qt5:
-        bind: $SNAP/usr/share/qt5
+  /usr/share/qt5:
+      bind: $SNAP/usr/share/qt5
+  /usr/lib/x86_64-linux-gnu/qt5/libexec:
+      bind: $SNAP/usr/lib/x86_64-linux-gnu/qt5/libexec
+  /usr/lib/x86_64-linux-gnu/qt5/plugins:
+      bind: $SNAP/usr/lib/x86_64-linux-gnu/qt5/plugins
+
 
 apps:
   somafm-qt:
-    command: desktop-launch $SNAP/usr/bin/somafm-qt
+#    command: desktop-launch $SNAP/usr/bin/somafm-qt
+    command: desktop-launch $SNAP/usr/bin/wrapper.sh
+#    command: wrapper
     environment:
       LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
 #      QTWEBENGINE_DISABLE_SANDBOX: 1
@@ -52,6 +59,7 @@ parts:
     source: .snap-data/
     organize:
       qt.conf: usr/local/lib/somafm-qt/qt.conf
+      qt.conf: usr/lib/somafm-qt/qt.conf
       qt.WebEngineProcess.conf: usr/lib/x86_64-linux-gnu/qt5/libexec/qt.conf
     after: [somafm-qt]
 
@@ -66,10 +74,9 @@ parts:
       - qtmultimedia5-dev
       - qtwebengine5-dev
       - qtwebengine5-dev-tools
-      - wayland-protocols
       - qttools5-dev-tools
-      - qt5-default
     stage-packages: 
+      - qt5-default
       - libqt5gui5
       - libqt5multimedia5
       - libqt5multimedia5-plugins
@@ -78,7 +85,9 @@ parts:
       - libqt5webenginecore5
       - libqt5webenginewidgets5
       - libqt5webengine5
+      - libqt5webkit5
       - qtwayland5
+      - wayland-protocols
       - libqt5dbus5
       - libqt5core5a
       - gstreamer1.0-pulseaudio
@@ -92,7 +101,7 @@ parts:
       - ttf-ubuntu-font-family
       - fonts-dejavu
       - qt5dxcb-plugin
-    after: [desktop-qt5]
+#    after: [desktop-qt5]
 
   desktop-qt5:
     source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
@@ -119,3 +128,11 @@ parts:
     - locales-all
     - xdg-user-dirs
     - fcitx-frontend-qt5
+
+
+  wrapper:
+    plugin: dump
+    after: [somafm-qt]
+    source: .
+    organize:
+      wrapper.sh: usr/bin/wrapper.sh
