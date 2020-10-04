@@ -1,0 +1,4 @@
+snapcraft
+snap install somafm-qt_master_amd64.snap --dangerous
+snap connect somafm-qt:network-manager-observe
+somafm-qt

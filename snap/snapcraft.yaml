@@ -1,0 +1,138 @@
+name: somafm-qt
+base: core18
+version: 'master'
+summary: SomaFM Radio (somafm.com) player (desktop, qt5)
+description: |
+  SomaFM Radio (somafm.com) player (desktop, qt5)
+grade: stable
+confinement: strict
+license: MIT
+architectures: [amd64]
+
+#plugs:
+#  browser-sandbox:
+#    interface: browser-support
+#    allow-sandbox: false
+
+# https://bugs.launchpad.net/snapcraft/+bug/1836206/
+layout:
+  /usr/share/qt5:
+      bind: $SNAP/usr/share/qt5
+  /usr/lib/x86_64-linux-gnu/qt5/libexec:
+      bind: $SNAP/usr/lib/x86_64-linux-gnu/qt5/libexec
+  /usr/lib/x86_64-linux-gnu/qt5/plugins:
+      bind: $SNAP/usr/lib/x86_64-linux-gnu/qt5/plugins
+
+
+apps:
+  somafm-qt:
+#    command: desktop-launch $SNAP/usr/bin/somafm-qt
+    command: desktop-launch $SNAP/usr/bin/wrapper.sh
+#    command: wrapper
+    environment:
+      LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
+#      QTWEBENGINE_DISABLE_SANDBOX: 1
+      QT_PLUGIN_PATH: $"QT_PLUGIN_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/qt5/plugins/"
+      QTWEBENGINEPROCESS_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/qt5/libexec
+    plugs: 
+#      - browser-sandbox
+      - browser-support
+      - home
+      - unity7
+      - desktop
+      - desktop-legacy
+      - network
+      - network-bind
+      - network-manager-observe
+#      - network-observe
+#      - network-setup-observe
+#      - network-manager
+#      - system-observe
+      - opengl
+      - pulseaudio
+      - wayland
+      - x11
+
+parts:
+  qtconf:
+    plugin: dump
+    source: .snap-data/
+    organize:
+      qt.conf: usr/local/lib/somafm-qt/qt.conf
+      qt.conf: usr/lib/somafm-qt/qt.conf
+      qt.WebEngineProcess.conf: usr/lib/x86_64-linux-gnu/qt5/libexec/qt.conf
+    after: [somafm-qt]
+
+  somafm-qt:
+#    source: https://github.com/fredix/somafm-qt.git
+#    source-type: git
+    source: .
+    plugin: qmake
+    build-attributes: [keep-execstack]
+    build-packages:
+      - qtbase5-dev
+      - qtmultimedia5-dev
+      - qtwebengine5-dev
+      - qtwebengine5-dev-tools
+      - qttools5-dev-tools
+    stage-packages: 
+      - qt5-default
+      - libqt5gui5
+      - libqt5multimedia5
+      - libqt5multimedia5-plugins
+      - libqt5multimediawidgets5
+      - libqt5widgets5
+      - libqt5webenginecore5
+      - libqt5webenginewidgets5
+      - libqt5webengine5
+      - libqt5webkit5
+      - qtwayland5
+      - wayland-protocols
+      - libqt5dbus5
+      - libqt5core5a
+      - gstreamer1.0-pulseaudio
+      - gstreamer1.0-plugins-base
+      - gstreamer1.0-plugins-good
+      - gstreamer1.0-plugins-ugly
+      - gstreamer1.0-plugins-bad
+      - libslang2
+      - libgpm2
+      - libglu1-mesa
+      - ttf-ubuntu-font-family
+      - fonts-dejavu
+      - qt5dxcb-plugin
+#    after: [desktop-qt5]
+
+  desktop-qt5:
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-branch: stable
+    source-subdir: qt
+    plugin: make
+    make-parameters: ["FLAVOR=qt5"]
+    build-packages:
+    - build-essential
+    - qtbase5-dev
+    - dpkg-dev
+    stage-packages:
+    - libxkbcommon0
+    - ttf-ubuntu-font-family
+    - dmz-cursor-theme
+    - light-themes
+    - adwaita-icon-theme
+    - gnome-themes-standard
+    - shared-mime-info
+    - libqt5gui5
+    - libgdk-pixbuf2.0-0
+    - libqt5svg5 # for loading icon themes which are svg
+    - try: [appmenu-qt5] # not available on core18
+    - locales-all
+    - xdg-user-dirs
+    - fcitx-frontend-qt5
+
+
+  wrapper:
+    plugin: dump
+    after: [somafm-qt]
+    source: .
+    organize:
+      wrapper.sh: usr/bin/wrapper.sh

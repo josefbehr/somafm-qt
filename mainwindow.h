@@ -9,6 +9,7 @@
 #include <QFrame>
 #include <QLabel>
 #include <QSystemTrayIcon>
+#include <QtWebEngineWidgets>
 
 #include "channelsview.h"
 #include "dataprovider.h"
@@ -39,6 +40,8 @@ private:
     PlayerView *m_playerView;
     QSystemTrayIcon *m_trayIcon;
     SettingsView *m_settingsView;
+    QWebEngineView *m_newsView;
+    QWebEngineView *m_historyView;
 
 public slots:
     void startPlayer(QString);

@@ -6,11 +6,14 @@
 
 QT       += core gui network xml multimedia
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets webenginewidgets
 
 TARGET = somafm-qt
+target.path = /usr/bin
+INSTALLS += target
 TEMPLATE = app
 
+# QMAKE_CXXFLAGS += "-fno-sized-deallocation"
 
 SOURCES += main.cpp\
         mainwindow.cpp \
