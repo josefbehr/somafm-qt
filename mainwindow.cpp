@@ -104,6 +104,17 @@ void MainWindow::createTrayIcon() {
     m_trayIcon->setToolTip(tr("Not playing"));
     connect(m_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
+
+    auto *menu = new QMenu();
+    menu->setTitle(QStringLiteral("somafm-qt"));
+
+    // add menu entry to quit the app
+    QAction *quitAction = menu->addAction(tr("Quit"));
+    quitAction->setIcon(QIcon::fromTheme(QStringLiteral("application-exit")));
+    connect(quitAction, &QAction::triggered, this,
+            &QApplication::quit);
+
+    m_trayIcon->setContextMenu(menu);
 }
 
 void MainWindow::showTrayIcon(bool show) {
@@ -141,10 +152,18 @@ void MainWindow::startPlayer(QString id) {
 
 void MainWindow::closeEvent(QCloseEvent *event) {
     qDebug() << "MainWindow::closeEvent";
+    const bool isJustHide = QSettings().value("showTrayIcon", true).toBool();
 
-    m_trayIcon->hide();
-    delete m_trayIcon;
-    event->accept();
+    // don't ignore close event when the app is hidden to tray
+    // this can occur when the OS issues close events on shutdown
+    if (isJustHide && !isHidden()) {
+        hide();
+        event->ignore();
+    } else {
+        m_trayIcon->hide();
+        delete m_trayIcon;
+        event->accept();
+    }
 }
 
 MainWindow::~MainWindow()
